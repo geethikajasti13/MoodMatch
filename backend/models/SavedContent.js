@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const savedContentSchema = new mongoose.Schema(
@@ -6,27 +7,30 @@ const savedContentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Content',
       required: [true, 'Content ID is required'],
-      index: true
+      index: true,
     },
     sessionId: {
       type: String,
       required: [true, 'Session ID or User ID is required'],
       trim: true,
-      index: true
+      index: true,
     },
     notes: {
       type: String,
       trim: true,
-      default: ''
-    }
+      default: '',
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
-// Prevent duplicate saves for the same session/user and content item
-savedContentSchema.index({ sessionId: 1, contentId: 1 }, { unique: true });
+// Prevent duplicate saves for the same session and content item.
+savedContentSchema.index(
+  { sessionId: 1, contentId: 1 },
+  { unique: true }
+);
 
 const SavedContent = mongoose.model('SavedContent', savedContentSchema);
 

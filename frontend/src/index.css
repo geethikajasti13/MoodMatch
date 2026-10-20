@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #faf8fc;
+    color: #2d2738;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Fraunces', Georgia, serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#7c6ca5] px-6 py-3 font-medium text-white shadow-sm transition-all hover:bg-[#6a5a93] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-[#d9c9e8] bg-white/70 px-5 py-2.5 font-medium text-[#5a4d75] transition-all hover:border-[#c0a9d8] hover:bg-white active:scale-[0.98];
+  }
+  .card {
+    @apply rounded-2xl border border-[#ece4f5] bg-white/80 shadow-sm transition-all duration-300;
+  }
+  .input-field {
+    @apply w-full rounded-xl border border-[#e0d6ee] bg-white/80 px-4 py-2.5 text-sm text-[#2d2738] outline-none transition-all placeholder:text-[#b3a8c5] focus:border-[#b89ad6] focus:ring-2 focus:ring-[#d9c9e8]/50;
+  }
+  .chip {
+    @apply cursor-pointer select-none rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all;
+  }
+  .chip-off {
+    @apply border-[#e0d6ee] bg-white/60 text-[#6a5d85] hover:border-[#c9b5e0];
+  }
+  .chip-on {
+    @apply border-[#b89ad6] bg-[#ece4f5] text-[#5a4d75] shadow-sm;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #f4f0fa; }
+::-webkit-scrollbar-thumb { background: #d9c9e8; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #c9b5e0; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fadeInUp 0.5s ease-out both; }
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float { animation: floatY 6s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #f0ebf7 25%, #e8e0f2 50%, #f0ebf7 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}

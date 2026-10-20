@@ -357,25 +357,43 @@ The lifecycle of a single recommendation request proceeds through six distinct s
 
 ---
 
-## 12. Planned Database Schema and Collections
+## 12. Implemented Database Schema and Collections
 
-### Collection: `contents`
+### 12.1 Collection: `contents` (`backend/models/Content.js`)
 
-The primary collection stores entertainment items across all media types.
+The primary collection stores entertainment items across all media types with rich mood and experience tags for recommendation matching.
 
-| Field Name | Type | Required | Description | Example Values |
-| :--- | :--- | :---: | :--- | :--- |
-| `title` | `String` | Yes | Title of the entertainment entry | `"Stranger Things"`, `"Dune"`, `"The Alchemist"` |
-| `contentType` | `String` | Yes | Media type category (Enum) | `'Book'`, `'Movie'`, `'TV Show'`, `'Web Series'`, `'Netflix Original'` |
-| `genres` | `[String]` | Yes | Array of associated traditional genres | `["Sci-Fi", "Mystery", "Horror"]` |
-| `moods` | `[String]` | Yes | Array of emotional resonance keywords | `["tense", "nostalgic", "mysterious"]` |
-| `desiredExperiences` | `[String]` | Yes | Thematic tags describing user experience | `["binge-worthy", "retro vibe", "supernatural suspense"]` |
-| `intensity` | `Number` | Yes | Intensity rating from 1 (very mild) to 5 (heavy) | `4` |
-| `description` | `String` | Yes | Detailed synopsis of the content | `"When a young boy vanishes, a small town uncovers a mystery..."` |
-| `posterUrl` | `String` | Yes | URL pointing to poster/cover artwork | `"https://example.com/posters/stranger-things.jpg"` |
-| `platform` | `String` | Yes | Primary streaming platform or distributor | `"Netflix"`, `"Prime Video"`, `"Goodreads"` |
-| `externalUrl` | `String` | No | Link to stream, purchase, or read reviews | `"https://www.netflix.com/title/80057281"` |
-| `createdAt` | `Date` | Auto | Timestamp of record creation | `2026-10-20T10:00:00.000Z` |
+| Field Name | Type | Required | Default | Description | Example Values |
+| :--- | :--- | :---: | :---: | :--- | :--- |
+| `title` | `String` | Yes | — | Title of the book, movie, or series | `"Stranger Things"`, `"Project Hail Mary"` |
+| `contentType` | `String` | Yes | — | Media type category (Enum: `'book'`, `'movie'`, `'series'`) | `'book'`, `'movie'`, `'series'` |
+| `platform` | `String` | No | `""` | Primary streaming platform or publisher | `"Netflix"`, `"Apple TV+"`, `"Canongate Books"` |
+| `isNetflixOriginal` | `Boolean` | No | `false` | Distinguishes verified Netflix Originals | `true` / `false` |
+| `genres` | `[String]` | No | `[]` | Traditional genre classifications | `["Sci-Fi", "Mystery", "Horror"]` |
+| `moods` | `[String]` | No | `[]` | Emotional resonance tags for recommendation matching | `["tense", "nostalgic", "hopeful", "stressed"]` |
+| `experiences` | `[String]` | No | `[]` | Experiential and narrative hook keywords | `["comfort", "inspiration", "excitement", "escapism"]` |
+| `intensity` | `String` | No | `"medium"` | Engagement intensity (Enum: `'low'`, `'medium'`, `'high'`) | `'low'`, `'medium'`, `'high'` |
+| `description` | `String` | No | `""` | Detailed storyline synopsis | `"When a boy mysteriously disappears, a small town..."` |
+| `posterUrl` | `String` | No | `""` | Valid HTTP/HTTPS poster/cover image URL | `""` |
+| `externalUrl` | `String` | No | `""` | Valid HTTP/HTTPS URL to stream or explore | `"https://www.netflix.com/title/80057281"` |
+| `createdAt` / `updatedAt` | `Date` | Auto | Auto | Mongoose timestamps | `2026-10-20T10:00:00.000Z` |
+
+**Indexes applied:**
+- `{ contentType: 1, moods: 1 }` (compound index for fast recommendation filtering)
+- `{ moods: 1 }`, `{ experiences: 1 }`, `{ title: 1 }` (single field indexes)
+
+### 12.2 Collection: `savedcontents` (`backend/models/SavedContent.js` — Optional)
+
+Supports saving/bookmarking recommended content items.
+
+| Field Name | Type | Required | Default | Description |
+| :--- | :--- | :---: | :---: | :--- |
+| `contentId` | `ObjectId` | Yes | — | Reference to target document in `contents` collection (`ref: 'Content'`) |
+| `userId` | `String` | No | `"guest_user"` | Session ID or guest user identifier (avoids day-1 auth complexity) |
+| `createdAt` / `updatedAt` | `Date` | Auto | Auto | Mongoose timestamps |
+
+**Indexes applied:**
+- `{ contentId: 1, userId: 1 }` (unique compound index to prevent duplicate saves)
 
 ---
 

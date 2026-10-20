@@ -1,18 +1,26 @@
+
 {
-  "name": "backend",
+  "name": "moodmatch-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend service and database layer for MoodMatch",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node seed.js",
-    "test": "node test.js"
+    "seed:database": "node scripts/seed.js",
+    "verify": "node scripts/verify-schema.js",
+    "test": "node test.js",
+    "test:db": "node scripts/verify-schema.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "moodmatch",
+    "mongodb",
+    "mongoose",
+    "recommendations"
+  ],
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^18.0.8",
