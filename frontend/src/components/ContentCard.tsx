@@ -28,7 +28,7 @@ export default function ContentCard({ item }: { item: ContentRecord }) {
   const coverSrc = (!imgError && item.coverUrl) ? item.coverUrl : '';
 
   return (
-    <article className="card group animate-fade-up overflow-hidden hover:-translate-y-1 hover:shadow-lg">
+    <article className="card group animate-fade-up overflow-hidden hover:-translate-y-1 hover:shadow-lg flex flex-col h-full">
       <Link to={`/content/${item._id}`} className="block">
         <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-lavender-100 to-cream-100">
           {coverSrc ? (
@@ -67,35 +67,37 @@ export default function ContentCard({ item }: { item: ContentRecord }) {
         </div>
       </Link>
 
-      <div className="p-4">
-        <div className="mb-1 flex items-start justify-between gap-2">
-          <Link to={`/content/${item._id}`} className="min-w-0">
-            <h3 className="truncate font-serif text-base font-semibold text-lavender-900 transition-colors group-hover:text-lavender-700">
-              {item.title}
-            </h3>
-          </Link>
-          <button
-            onClick={() => toggle(item)}
-            aria-label={saved ? 'Remove bookmark' : 'Add bookmark'}
-            className={`shrink-0 rounded-lg p-1.5 transition-all ${
-              saved ? 'text-lavender-600 hover:bg-lavender-50' : 'text-lavender-300 hover:bg-lavender-50 hover:text-lavender-500'
-            }`}
-          >
-            {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
-          </button>
-        </div>
+      <div className="p-4 flex flex-col flex-1 justify-between">
+        <div>
+          <div className="mb-1 flex items-start justify-between gap-2">
+            <Link to={`/content/${item._id}`} className="min-w-0">
+              <h3 className="truncate font-serif text-base font-semibold text-lavender-900 transition-colors group-hover:text-lavender-700">
+                {item.title}
+              </h3>
+            </Link>
+            <button
+              onClick={() => toggle(item)}
+              aria-label={saved ? 'Remove bookmark' : 'Add bookmark'}
+              className={`shrink-0 rounded-lg p-1.5 transition-all ${
+                saved ? 'text-lavender-600 hover:bg-lavender-50' : 'text-lavender-300 hover:bg-lavender-50 hover:text-lavender-500'
+              }`}
+            >
+              {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+            </button>
+          </div>
 
-        <p className="mb-2 text-xs text-lavender-800/60">
-          {item.creator || item.platform || 'MoodMatch Pick'} {item.year ? `· ${item.year}` : ''}
-        </p>
-
-        {item.matchReason && (
-          <p className="mb-2 text-xs font-medium text-lavender-700 bg-lavender-50/80 px-2 py-1 rounded-md">
-            ✨ {item.matchReason}
+          <p className="mb-2 text-xs text-lavender-800/60">
+            {item.creator || item.platform || 'MoodMatch Pick'} {item.year ? `· ${item.year}` : ''}
           </p>
-        )}
 
-        <p className="line-clamp-2 text-sm text-lavender-800/70">{item.description}</p>
+          {item.matchReason && (
+            <p className="mb-2 text-xs font-medium text-lavender-700 bg-lavender-50/80 px-2 py-1 rounded-md">
+              ✨ {item.matchReason}
+            </p>
+          )}
+
+          <p className="line-clamp-2 text-sm text-lavender-800/70">{item.description}</p>
+        </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {item.moods.slice(0, 3).map((m) => (

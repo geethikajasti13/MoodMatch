@@ -1,27 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Compass, BookmarkX } from 'lucide-react';
 import type { ContentRecord } from '@/types';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import ContentCard from '@/components/ContentCard';
-import { CardGrid, EmptyState } from '@/components/States';
+import { CardGrid, EmptyState, ContentGridSkeleton } from '@/components/States';
 
 export default function MyList() {
-  const { all, ids } = useBookmarks();
+  const { all, loading } = useBookmarks();
   const [filter, setFilter] = useState('');
-  const [version, setVersion] = useState(0);
 
-  // Re-render when bookmarks change
-  useEffect(() => {
-    const refresh = () => setVersion((v) => v + 1);
-    window.addEventListener('bookmark-changed', refresh);
-    return () => window.removeEventListener('bookmark-changed', refresh);
-  }, []);
+  // Deduplicate and filter items safely by type
+  const items: ContentRecord[] = useMemo(() => {
+    const list = filter
+      ? all.filter((b) => (b.type || b.contentType || '').toLowerCase() === filter.toLowerCase())
+      : all;
 
-  const items: ContentRecord[] = filter ? all.filter((b) => b.type === filter) : all;
+    // Guarantee unique and stable items by _id
+    const seen = new Set<string>();
+    const unique: ContentRecord[] = [];
+    for (const item of list) {
+      if (!item || !item._id) continue;
+      const id = String(item._id);
+      if (!seen.has(id)) {
+        seen.add(id);
+        unique.push(item);
+      }
+    }
+    return unique;
+  }, [all, filter]);
 
   return (
-    <div className="mx-auto max-w-6xl px-5 pt-24 pb-12 md:pt-28" key={version}>
+    <div className="mx-auto max-w-6xl px-5 pt-24 pb-12 md:pt-28">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-lavender-900">My List</h1>
@@ -51,7 +61,9 @@ export default function MyList() {
         )}
       </div>
 
-      {all.length === 0 ? (
+      {loading && all.length === 0 ? (
+        <ContentGridSkeleton count={4} />
+      ) : all.length === 0 ? (
         <EmptyState
           title="Your list is empty"
           message="Bookmark titles you love and they'll show up here for easy access."

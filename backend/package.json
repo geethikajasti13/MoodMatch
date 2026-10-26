@@ -10,6 +10,7 @@
     "dev": "nodemon server.js",
     "seed": "node seed.js",
     "seed:database": "node scripts/seed.js",
+    "seed:extended": "node scripts/seed-extended.js",
     "verify": "node scripts/verify-schema.js",
     "test": "node test.js",
     "test:db": "node scripts/verify-schema.js"

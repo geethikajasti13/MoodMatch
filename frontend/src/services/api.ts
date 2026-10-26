@@ -1,5 +1,6 @@
 import type { ContentRecord, ContentType, MoodInterpretation } from '@/types';
 import { CONTENT } from '@/data/content';
+import { getRealPoster } from '@/data/realPosters';
 import { scoreContent, interpretMood as localInterpretMood } from './moodEngine';
 
 /**
@@ -8,8 +9,14 @@ import { scoreContent, interpretMood as localInterpretMood } from './moodEngine'
  * If the backend is not running, gracefully falls back to the bundled dataset.
  */
 
-const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE = (import.meta as any).env?.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 const FALLBACK_ENABLED = (import.meta as any).env?.VITE_ALLOW_FALLBACK !== 'false';
+
+// Enrich fallback records with real official posters
+const ENRICHED_CONTENT: ContentRecord[] = CONTENT.map((c) => {
+  const real = getRealPoster(c.title);
+  return real ? { ...c, coverUrl: real, posterUrl: real } : c;
+});
 
 let backendReachable: boolean | null = null;
 let lastCheckTime = 0;
@@ -38,8 +45,12 @@ export async function checkBackend(force = false): Promise<boolean> {
  * when a database record has no posterUrl.
  */
 function getFallbackCover(type: ContentType, title: string): string {
+  const realPoster = getRealPoster(title);
+  if (realPoster) {
+    return realPoster;
+  }
   const lowerTitle = (title || '').toLowerCase();
-  const match = CONTENT.find((c) => c.title.toLowerCase() === lowerTitle);
+  const match = ENRICHED_CONTENT.find((c) => c.title.toLowerCase() === lowerTitle);
   if (match && match.coverUrl) {
     return match.coverUrl;
   }
@@ -59,8 +70,10 @@ function getFallbackCover(type: ContentType, title: string): string {
 export function normalizeContent(raw: any): ContentRecord {
   const type = ((raw.contentType || raw.type || 'movie') as string).toLowerCase() as ContentType;
   const title = raw.title || 'Untitled';
+  const realPoster = getRealPoster(title);
   const coverUrl =
     (raw.posterUrl && raw.posterUrl.trim() !== '') ? raw.posterUrl
+    : realPoster ? realPoster
     : (raw.coverUrl && raw.coverUrl.trim() !== '') ? raw.coverUrl
     : getFallbackCover(type, title);
 
@@ -105,7 +118,7 @@ export async function fetchAllContent(): Promise<ContentRecord[]> {
       console.warn('[API] Failed to fetch content from backend, falling back:', err);
     }
   }
-  return FALLBACK_ENABLED ? CONTENT : [];
+  return FALLBACK_ENABLED ? ENRICHED_CONTENT : [];
 }
 
 export async function fetchContentById(id: string): Promise<ContentRecord | null> {
@@ -121,7 +134,7 @@ export async function fetchContentById(id: string): Promise<ContentRecord | null
       console.warn('[API] Failed to fetch content by ID from backend:', err);
     }
   }
-  return FALLBACK_ENABLED ? CONTENT.find((c) => c._id === id) || null : null;
+  return FALLBACK_ENABLED ? ENRICHED_CONTENT.find((c) => c._id === id) || null : null;
 }
 
 export interface DiscoverFilters {
@@ -165,7 +178,7 @@ export async function fetchFiltered(filters: DiscoverFilters): Promise<ContentRe
       console.warn('[API] Failed filtered content request from backend:', err);
     }
   }
-  return localFilter(CONTENT, filters);
+  return localFilter(ENRICHED_CONTENT, filters);
 }
 
 export interface RecommendationResult {
@@ -234,7 +247,7 @@ export async function fetchRecommendations(
 }
 
 function localRecommend(interp: MoodInterpretation): ContentRecord[] {
-  return CONTENT.map((c) => ({ c, s: scoreContent(c.moods, interp) }))
+  return ENRICHED_CONTENT.map((c) => ({ c, s: scoreContent(c.moods, interp) }))
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s)
     .map((x) => x.c);

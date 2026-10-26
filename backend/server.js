@@ -98,4 +98,4 @@ if (require.main === module) {
   startServer();
 }
 
-module.exports = { app, connectDB, startServer };
+module.exports = { app, connectDB, startServer, mongoose };
